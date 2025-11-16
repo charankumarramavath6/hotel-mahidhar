@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Mahi - Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .setup-steps {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        .code {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+        }
+        .btn:hover { background: #45a049; }
+        .warning {
+            background: rgba(255,193,7,0.2);
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏨 Hotel Mahi Management System</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Prerequisites Required:</strong> You need to install Node.js and MySQL to run the full application.
+        </div>
+
+        <div class="setup-steps">
+            <h2>📋 Setup Instructions</h2>
+            
+            <div class="step">
+                <h3>1. Install Node.js</h3>
+                <p>Download and install Node.js from <a href="https://nodejs.org/" target="_blank" style="color: #4CAF50;">https://nodejs.org/</a></p>
+                <div class="code">node --version  # Verify installation</div>
+            </div>
+
+            <div class="step">
+                <h3>2. Install MySQL</h3>
+                <p>Download and install MySQL from <a href="https://dev.mysql.com/downloads/mysql/" target="_blank" style="color: #4CAF50;">https://dev.mysql.com/downloads/mysql/</a></p>
+                <p>Or use XAMPP for easier setup: <a href="https://www.apachefriends.org/" target="_blank" style="color: #4CAF50;">https://www.apachefriends.org/</a></p>
+            </div>
+
+            <div class="step">
+                <h3>3. Install Dependencies</h3>
+                <div class="code">npm install</div>
+            </div>
+
+            <div class="step">
+                <h3>4. Configure Database</h3>
+                <p>Edit <code>server.js</code> and update MySQL connection:</p>
+                <div class="code">
+const dbConfig = {
+  host: 'localhost',
+  user: 'root',
+  password: 'your_mysql_password', // Change this
+  database: 'hotel_mahi',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+};
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>5. Start the Server</h3>
+                <div class="code">npm start</div>
+                <p>Then open: <a href="http://localhost:3000" target="_blank" style="color: #4CAF50;">http://localhost:3000</a></p>
+            </div>
+        </div>
+
+        <div class="setup-steps">
+            <h2>🚀 Features</h2>
+            <ul>
+                <li>✅ User Registration with Customer ID generation</li>
+                <li>✅ Room Booking and Management</li>
+                <li>✅ Service Selection (Spa, Dining, Parking)</li>
+                <li>✅ Staff Assignment</li>
+                <li>✅ Payment Processing</li>
+                <li>✅ Membership Plans</li>
+                <li>✅ Real-time MySQL Database Storage</li>
+                <li>✅ Responsive Design</li>
+            </ul>
+        </div>
+
+        <div class="setup-steps">
+            <h2>📊 Database Schema</h2>
+            <p>The system includes these MySQL tables:</p>
+            <ul>
+                <li><strong>customers</strong> - User profiles with Customer IDs</li>
+                <li><strong>rooms</strong> - Room details and availability</li>
+                <li><strong>bookings</strong> - Reservation management</li>
+                <li><strong>payments</strong> - Payment tracking</li>
+                <li><strong>staff</strong> - Hotel staff information</li>
+                <li><strong>services</strong> - Additional amenities</li>
+                <li><strong>memberships</strong> - Customer membership plans</li>
+                <li><strong>vehicles</strong> - Customer vehicle information</li>
+                <li><strong>parking</strong> - Parking spot management</li>
+            </ul>
+        </div>
+
+        <div class="setup-steps">
+            <h2>🔧 Quick Start Commands</h2>
+            <div class="code">
+# Install dependencies
+npm install
+
+# Start the server
+npm start
+
+# For development with auto-restart
+npm run dev
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="index.html" class="btn">View Main Application</a>
+            <a href="SETUP-GUIDE.md" class="btn">Detailed Setup Guide</a>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
