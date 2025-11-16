@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hotel Mahi - Standalone Demo</title>
+    <meta name="description" content="Hotel management single-page website: rooms, booking, services, staff, food, parking, membership, payment, contact." />
+    <style>
+      :root {
+        --bg: #0b1020;
+        --bg-soft: #121931;
+        --card: #171f3a;
+        --text: #e9eefb;
+        --muted: #b6c2e2;
+        --primary: #4f8cff;
+        --primary-700: #3e72d0;
+        --accent: #22c55e;
+        --warn: #f59e0b;
+        --danger: #ef4444;
+        --border: #243055;
+        --shadow: 0 10px 30px rgba(0,0,0,0.35);
+        --radius: 14px;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        background: linear-gradient(180deg, var(--bg) 0%, #0d1530 100%);
+        color: var(--text);
+      }
+      a { color: var(--text); text-decoration: none; }
+      img { max-width: 100%; display: block; border-radius: 12px; }
+      .container { width: min(1200px, 92vw); margin: 0 auto; }
+      header.header {
+        position: sticky; top: 0; z-index: 50;
+        background: rgba(10,14,32,0.75); backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border);
+      }
+      .nav {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 0;
+      }
+      .brand {
+        display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: 0.4px;
+      }
+      .logo {
+        width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--primary), #7aa8ff);
+        display: grid; place-items: center; color: white; font-weight: 900; box-shadow: var(--shadow);
+      }
+      .brand small { display: block; color: var(--muted); font-weight: 500; letter-spacing: 0.2px; }
+      .nav a {
+        padding: 10px 14px; border-radius: 10px; color: var(--muted);
+      }
+      .nav a.active, .nav a:hover { color: var(--text); background: rgba(79,140,255,0.12); }
+      .grid { display: grid; gap: 18px; }
+      .grid.cards { grid-template-columns: repeat(12, 1fr); }
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+      .card-body { padding: 16px; }
+      .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: #0f1630; color: var(--text); cursor: pointer; }
+      .btn.primary { background: linear-gradient(135deg, var(--primary) 0%, #7aa8ff 100%); color: white; border: none; }
+      .btn.ghost { background: transparent; }
+      .btn.warn { background: var(--warn); color: #172554; border: none; }
+      .btn.success { background: var(--accent); color: #052e16; border: none; }
+      .btn.danger { background: var(--danger); color: #ffffff; border: none; }
+      .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); color: var(--muted); }
+      .badge.ok { background: rgba(34,197,94,0.12); color: #86efac; border-color: #14532d; }
+      .badge.busy { background: rgba(239,68,68,0.12); color: #fecaca; border-color: #7f1d1d; }
+      .row { display: flex; flex-wrap: wrap; gap: 16px; }
+      .row > * { flex: 1 1 280px; }
+      .split { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+      .muted { color: var(--muted); }
+      .price { font-weight: 800; font-size: 18px; }
+      .field { display: grid; gap: 6px; }
+      .field input, .field select, .field textarea {
+        background: #0d1530; border: 1px solid var(--border); color: var(--text);
+        border-radius: 10px; padding: 10px 12px; outline: none; width: 100%;
+      }
+      .field textarea { min-height: 100px; resize: vertical; }
+      form { display: grid; gap: 12px; }
+      .section { padding: 28px 0 36px; }
+      .section h2 { margin: 0 0 10px; }
+      .section .lead { color: var(--muted); margin: 0 0 18px; }
+      .carousel { position: relative; height: 280px; border-radius: var(--radius); overflow: hidden; }
+      .carousel .slides { position: absolute; inset: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 100%; transition: transform .6s ease; }
+      .carousel .slide { position: relative; padding: 22px; display: grid; align-content: end; background-size: cover; background-position: center; }
+      .carousel .slide::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(9,12,26,0.85) 70%); }
+      .carousel .caption { position: relative; z-index: 1; }
+      .carousel .caption h3 { margin: 0 0 6px; }
+      .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+      .toolbar .spacer { flex: 1; }
+      .sidebar { position: sticky; top: 84px; height: fit-content; }
+      footer { border-top: 1px solid var(--border); background: rgba(10,14,32,0.6); margin-top: 26px; }
+      footer .cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 24px 0; }
+      footer small { color: var(--muted); }
+      .kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+      .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+      .hidden { display: none !important; }
+      .hotel-id-badge { position: fixed; right: 12px; bottom: 12px; background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 6px 10px; border-radius: 999px; box-shadow: var(--shadow); font-size: 12px; z-index: 60; }
+      
+      /* Modal Styles */
+      .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+      .modal-content { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); width: min(400px, 90vw); max-height: 90vh; overflow-y: auto; }
+      .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); }
+      .modal-body { padding: 16px; }
+      .close-btn { background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; }
+      .close-btn:hover { color: var(--text); }
+      
+      /* User Profile Styles */
+      .user-profile { position: fixed; top: 14px; right: 14px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; box-shadow: var(--shadow); z-index: 50; }
+      .profile-info { display: flex; align-items: center; gap: 8px; }
+      .customer-id { font-size: 11px; color: var(--muted); background: rgba(79,140,255,0.1); padding: 2px 6px; border-radius: 4px; }
+      
+      @media (max-width: 960px) { .split { grid-template-columns: 1fr; } footer .cols { grid-template-columns: 1fr 1fr; } .kpis { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 640px) { .nav a { padding: 8px 10px; } footer .cols { grid-template-columns: 1fr; } .kpis { grid-template-columns: 1fr; } .user-profile { position: static; margin: 8px 0; } }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="container nav" role="navigation" aria-label="Main">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">HM</div>
+          <div>
+            Hotel Mahi
+            <small>Comfort • Cuisine • Care</small>
+          </div>
+        </div>
+        <nav class="row" style="flex-wrap: nowrap; gap: 6px; justify-content: flex-end;">
+          <a href="#/home" data-link>Home</a>
+          <a href="#/rooms" data-link>Rooms</a>
+          <a href="#/services" data-link>Services</a>
+          <a href="#/staff" data-link>Staff</a>
+          <a href="#/booking" data-link>Booking</a>
+          <a href="#/membership" data-link>Membership</a>
+          <a href="#/contact" data-link>Contact</a>
+          <button id="loginBtn" class="btn primary" onclick="showAuthModal()">Login</button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Login/Register Modal -->
+    <div id="authModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="authTitle">Login</h2>
+          <button class="close-btn" onclick="closeAuthModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="authForm">
+            <div id="registerFields" class="hidden">
+              <div class="field">
+                <label for="regName">Full Name</label>
+                <input id="regName" type="text" required placeholder="Your full name" />
+              </div>
+              <div class="field">
+                <label for="regPhone">Phone Number</label>
+                <input id="regPhone" type="tel" required placeholder="+91 98765 43210" />
+              </div>
+              <div class="field">
+                <label for="regStreet">Street Address</label>
+                <input id="regStreet" type="text" required placeholder="123 Main Street" />
+              </div>
+              <div class="field">
+                <label for="regCity">City</label>
+                <input id="regCity" type="text" required placeholder="Indore" />
+              </div>
+              <div class="field">
+                <label for="regLandmark">Landmark</label>
+                <input id="regLandmark" type="text" placeholder="Near Phoenix Mall" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="authEmail">Email</label>
+              <input id="authEmail" type="email" required placeholder="your@email.com" />
+            </div>
+            <div class="field">
+              <label for="authPassword">Password</label>
+              <input id="authPassword" type="password" required placeholder="Your password" />
+            </div>
+            <div class="row" style="justify-content: space-between; margin-top: 16px;">
+              <button type="button" id="toggleAuth" class="btn ghost">Switch to Register</button>
+              <button type="submit" class="btn primary">Login</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile Section -->
+    <div id="userProfile" class="user-profile hidden">
+      <div class="profile-info">
+        <span id="userName">Welcome, User</span>
+        <span id="customerId" class="customer-id"></span>
+        <button class="btn ghost" onclick="showProfile()">Profile</button>
+        <button class="btn danger" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <main id="app" class="container" tabindex="-1"></main>
+
+    <footer>
+      <div class="container">
+        <div class="cols">
+          <div>
+            <h3 style="margin: 16px 0 8px;">Hotel Mahi</h3>
+            <small>Premium stays, curated dining, and exceptional service in the heart of the city.</small>
+          </div>
+          <div>
+            <h4>Contact</h4>
+            <small>☎ +91 98765 43210</small><br />
+            <small>☎ +91 91234 56789</small><br />
+            <small>✉ hotelmahi@hotelmahi.in</small><br />
+            <small>📍 Tejaji Nagar, Near Phoenix Mall, Indore</small>
+          </div>
+          <div>
+            <h4>Legal</h4>
+            <small><a href="#/home" aria-label="Privacy Policy">Privacy Policy</a></small><br />
+            <small><a href="#/home" aria-label="Terms of Service">Terms of Service</a></small>
+          </div>
+          <div>
+            <h4>Social</h4>
+            <div class="row" style="gap:8px;">
+              <a class="btn ghost" href="#/home" aria-label="Twitter">🐦 Twitter</a>
+              <a class="btn ghost" href="#/home" aria-label="Instagram">📸 Instagram</a>
+              <a class="btn ghost" href="#/home" aria-label="Facebook">📘 Facebook</a>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--border); padding: 12px 0; display:flex; align-items:center; justify-content: space-between;">
+          <small>© <span id="year"></span> Hotel Mahi Hospitality</small>
+          <small>All rights reserved</small>
+        </div>
+      </div>
+    </footer>
+    <div class="hotel-id-badge" aria-label="Hotel Identifier">Hotel ID: HM-IND-0001</div>
+
+    <script>
+      // --- Standalone Demo Mode (No Backend Required)
+      let currentUser = null;
+      let authToken = null;
+
+      // --- Simple SPA Router
+      const Router = (() => {
+        const routes = new Map();
+        const parseHash = () => {
+          const hash = location.hash || '#/home';
+          const [path, queryString] = hash.slice(1).split('?');
+          const params = {};
+          if (queryString) {
+            for (const part of queryString.split('&')) {
+              const [k, v] = part.split('=');
+              params[decodeURIComponent(k)] = decodeURIComponent(v ?? '');
+            }
+          }
+          return { path: '/' + (path.replace(/^\/+/, '')), params };
+        };
+        const navigate = (href) => { location.hash = href; };
+        const onChange = async () => {
+          const { path, params } = parseHash();
+          const handler = routes.get(path) || routes.get('/home');
+          if (handler) await handler(params);
+          updateActiveNav(path);
+          document.getElementById('app').focus({ preventScroll: true });
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        const mount = (path, handler) => routes.set(path, handler);
+        const start = () => {
+          window.addEventListener('hashchange', onChange);
+          onChange();
+        };
+        const updateActiveNav = (activePath) => {
+          document.querySelectorAll('[data-link]').forEach(a => {
+            const path = new URL(a.href).hash.split('?')[0].slice(1);
+            a.classList.toggle('active', ('/' + path.replace(/^\/+/, '')) === activePath);
+          });
+        };
+        return { mount, start, navigate, parseHash };
+      })();
+
+      // --- Demo Data
+      const state = {
+        rooms: [
+          { id: 'R101', name: 'Deluxe Sea View', type: 'Deluxe', capacity: 2, price: 189, status: 'available', rating: 4.7, image: 'https://images.unsplash.com/photo-1501117716987-c8e4b1bd7a5c?q=80&w=800&auto=format&fit=crop', location: 'East Wing, Level 10' },
+          { id: 'R102', name: 'Executive Suite', type: 'Suite', capacity: 4, price: 329, status: 'booked', rating: 4.9, image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=800&auto=format&fit=crop', location: 'North Tower, Level 18' },
+          { id: 'R103', name: 'Family Garden', type: 'Family', capacity: 4, price: 239, status: 'available', rating: 4.5, image: 'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?q=80&w=800&auto=format&fit=crop', location: 'Garden Annex, Level 3' },
+          { id: 'R104', name: 'Standard City View', type: 'Standard', capacity: 2, price: 129, status: 'available', rating: 4.2, image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=800&auto=format&fit=crop', location: 'Main, Level 6' },
+          { id: 'R105', name: 'Penthouse Royal', type: 'Suite', capacity: 2, price: 599, status: 'booked', rating: 5.0, image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=800&auto=format&fit=crop', location: 'Skyline, Level 30' }
+        ],
+        services: [
+          { id: 'S-food', name: 'In-Room Dining', category: 'Food', price: 25, desc: '24/7 curated menu delivered to your door.', image: 'https://picsum.photos/seed/food/800/480' },
+          { id: 'S-spa', name: 'Spa & Wellness', category: 'Membership', price: 49, desc: 'Access to sauna, pool, and gym.', image: 'https://picsum.photos/seed/spa/800/480' }
+        ],
+        staff: [
+          { id: 'ST001', name: 'Santhosh', role: 'Chef', skill: 'Gourmet Dining', image: 'assets/staff/santhosh.jpg' },
+          { id: 'ST002', name: 'Pankaj', role: 'Concierge', skill: 'City Assistance', image: 'assets/staff/pankaj.jpg' },
+          { id: 'ST003', name: 'Soumya', role: 'Spa Therapist', skill: 'Wellness & Massage', image: 'assets/staff/soumya.jpg' },
+          { id: 'ST004', name: 'Amit', role: 'Housekeeping', skill: 'Room Care', image: 'assets/staff/amit.jpg' }
+        ],
+        menu: { 
+          Breakfast: [
+            { id: 'F101', name: 'Continental Platter', desc: 'Pastries, fruits, juices', price: 16 },
+            { id: 'F102', name: 'Omelette & Toast', desc: 'Free-range eggs, sourdough', price: 14 }
+          ],
+          Lunch: [
+            { id: 'F201', name: 'Grilled Chicken Bowl', desc: 'Greens, quinoa, herbs', price: 19 },
+            { id: 'F202', name: 'Pasta Primavera', desc: 'Seasonal veggies, parmesan', price: 18 }
+          ],
+          Dinner: [
+            { id: 'F301', name: 'Seared Salmon', desc: 'Citrus butter, asparagus', price: 27 },
+            { id: 'F302', name: 'Steak Frites', desc: 'Striploin, peppercorn, fries', price: 32 }
+          ]
+        },
+        parkingSpots: Array.from({ length: 18 }, (_, i) => ({ id: 'P' + (i+1).toString().padStart(2,'0'), available: Math.random() > 0.35 })),
+        booking: {
+          personal: {},
+          roomId: null,
+          services: [],
+          staffId: null,
+          checkIn: null,
+          checkOut: null,
+          guests: 1,
+          total: 0,
+          parking: { spotId: null, price: 0 }
+        }
+      };
+
+      // --- Demo Authentication (Local Storage)
+      const showAuthModal = () => {
+        document.getElementById('authModal').classList.remove('hidden');
+        document.getElementById('authTitle').textContent = 'Login';
+        document.getElementById('toggleAuth').textContent = 'Switch to Register';
+        document.getElementById('registerFields').classList.add('hidden');
+      };
+
+      const closeAuthModal = () => {
+        document.getElementById('authModal').classList.add('hidden');
+        document.getElementById('authForm').reset();
+      };
+
+      const toggleAuthMode = () => {
+        const isLogin = document.getElementById('authTitle').textContent === 'Login';
+        if (isLogin) {
+          document.getElementById('authTitle').textContent = 'Register';
+          document.getElementById('toggleAuth').textContent = 'Switch to Login';
+          document.getElementById('registerFields').classList.remove('hidden');
+        } else {
+          document.getElementById('authTitle').textContent = 'Login';
+          document.getElementById('toggleAuth').textContent = 'Switch to Register';
+          document.getElementById('registerFields').classList.add('hidden');
+        }
+      };
+
+      const handleAuth = async (e) => {
+        e.preventDefault();
+        const isLogin = document.getElementById('authTitle').textContent === 'Login';
+        const email = document.getElementById('authEmail').value;
+        const password = document.getElementById('authPassword').value;
+        
+        if (isLogin) {
+          // Demo Login - Check localStorage
+          const savedUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+          const user = savedUsers.find(u => u.email === email && u.password === password);
+          
+          if (user) {
+            currentUser = { customer_id: user.customer_id, email: user.email, name: user.name };
+            authToken = 'demo-token-' + Date.now();
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            localStorage.setItem('authToken', authToken);
+            
+            updateUserInterface();
+            closeAuthModal();
+            alert('Login successful! Welcome back, ' + user.name);
+          } else {
+            alert('Invalid credentials. Please register first or check your details.');
+          }
+        } else {
+          // Demo Registration
+          const name = document.getElementById('regName').value;
+          const phone_no = document.getElementById('regPhone').value;
+          const street = document.getElementById('regStreet').value;
+          const city = document.getElementById('regCity').value;
+          const landmark = document.getElementById('regLandmark').value;
+          
+          const customerId = 'CUST-' + Date.now().toString().slice(-6) + '-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+          
+          const newUser = {
+            customer_id: customerId,
+            name: name,
+            email: email,
+            password: password,
+            phone_no: phone_no,
+            street: street,
+            city: city,
+            landmark: landmark
+          };
+          
+           const savedUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+          savedUsers.push(newUser);
+          localStorage.setItem('demoUsers', JSON.stringify(savedUsers));
+          
+          currentUser = { customer_id: customerId, email: email, name: name };
+          authToken = 'demo-token-' + Date.now();
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          localStorage.setItem('authToken', authToken);
+          
+          updateUserInterface();
+          closeAuthModal();
+          alert(`Registration successful! Your Customer ID: ${customerId}`);
+        }
+      };
+
+      const logout = () => {
+        currentUser = null;
+        authToken = null;
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken');
+        updateUserInterface();
+        Router.navigate('/home');
+      };
+
+      const updateUserInterface = () => {
+        const loginBtn = document.getElementById('loginBtn');
+        const userProfile = document.getElementById('userProfile');
+        
+        if (currentUser) {
+          loginBtn.style.display = 'none';
+          userProfile.classList.remove('hidden');
+          document.getElementById('userName').textContent = `Welcome, ${currentUser.name}`;
+          document.getElementById('customerId').textContent = currentUser.customer_id;
+        } else {
+          loginBtn.style.display = 'block';
+          userProfile.classList.add('hidden');
+        }
+      };
+
+      const showProfile = () => {
+        if (!currentUser) return;
+        
+        const savedUsers = JSON.parse(localStorage.getItem('demoUsers') || '[]');
+        const user = savedUsers.find(u => u.customer_id === currentUser.customer_id);
+        
+        if (user) {
+          alert(`Profile Information:\nName: ${user.name}\nEmail: ${user.email}\nPhone: ${user.phone_no}\nAddress: ${user.street}, ${user.city}\nCustomer ID: ${user.customer_id}`);
+        }
+      };
+
+      // --- Utilities
+      function money(n) {
+        try {
+          return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(Number(n));
+        } catch (e) {
+          return '₹' + Number(n).toFixed(2);
+        }
+      }
+      function el(html) { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstElementChild; }
+      function groupBy(arr, key) { return arr.reduce((acc, it) => { (acc[it[key]] ||= []).push(it); return acc; }, {}); }
+      function setHash(path, params) {
+        const q = params ? '?' + Object.entries(params).map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&') : '';
+        location.hash = path + q;
+      }
+      function calcBookingTotal() {
+        const room = state.rooms.find(r => r.id === state.booking.roomId);
+        const roomPrice = room ? room.price : 0;
+        const servicesTotal = state.booking.services
+          .map(id => state.services.find(s => s.id === id)?.price || 0)
+          .reduce((a,b) => a+b, 0);
+        const nights = (() => {
+          if (!state.booking.checkIn || !state.booking.checkOut) return 1;
+          const d1 = new Date(state.booking.checkIn), d2 = new Date(state.booking.checkOut);
+          const diff = Math.max(1, Math.round((d2 - d1) / (1000*60*60*24)));
+          return diff;
+        })();
+        const parkingFee = state.booking.parking?.price || 0;
+        state.booking.total = roomPrice * nights + servicesTotal + parkingFee;
+      }
+
+      // --- Renderers (Simplified for Demo)
+      function renderHome() {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+          <section class="section">
+            <div class="carousel card" aria-roledescription="carousel" aria-label="Amenities and promotions">
+              <div class="slides">
+                <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1501117716987-c8e4b1bd7a5c?q=80&w=2400&auto=format&fit=crop')">
+                  <div class="caption">
+                    <h3>Wake up to azure horizons</h3>
+                    <div class="muted">Deluxe Sea View from ${money(189)}</div>
+                    <div style="margin-top:10px; display:flex; gap:8px;">
+                      <a class="btn primary" href="#/rooms">Explore Rooms</a>
+                      <a class="btn ghost" href="#/services">View Services</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="section">
+            <div class="kpis">
+              <div class="kpi"><div class="muted">Rooms Available</div><div style="font-size:22px; font-weight:800;">${state.rooms.filter(r=>r.status==='available').length}</div></div>
+              <div class="kpi"><div class="muted">Dining Options</div><div style="font-size:22px; font-weight:800;">${Object.values(state.menu).flat().length}</div></div>
+              <div class="kpi"><div class="muted">Happy Members</div><div style="font-size:22px; font-weight:800;">12,840</div></div>
+              <div class="kpi"><div class="muted">Avg. Rating</div><div style="font-size:22px; font-weight:800;">4.6★</div></div>
+            </div>
+          </section>
+          <section class="section">
+            <h2>Experience more with Hotel Mahi</h2>
+            <p class="lead">Curated stays, inspired dining, attentive staff, and rewarding membership perks.</p>
+            <div class="row">
+              <div class="card"><img src="https://picsum.photos/seed/rooms/800/300" alt="Rooms" /><div class="card-body"><h3>Elegant Rooms</h3><p class="muted">From Standard to Royal Suites, always spotless and serene.</p><a class="btn" href="#/rooms">Browse Rooms</a></div></div>
+              <div class="card"><img src="https://picsum.photos/seed/foodx/800/300" alt="Food" /><div class="card-body"><h3>Signature Cuisine</h3><p class="muted">All-day dining with seasonal menus and room service.</p><a class="btn" href="#/food">See Menu</a></div></div>
+              <div class="card"><img src="https://picsum.photos/seed/staffx/800/300" alt="Staff" /><div class="card-body"><h3>Attentive Staff</h3><p class="muted">Concierge, housekeeping, spa and more—on your schedule.</p><a class="btn" href="#/staff">Meet the Team</a></div></div>
+              <div class="card"><img src="https://picsum.photos/seed/member/800/300" alt="Membership" /><div class="card-body"><h3>Membership Benefits</h3><p class="muted">Earn rewards, get upgrades, enjoy exclusive offers.</p><a class="btn" href="#/membership">Join Now</a></div></div>
+            </div>
+          </section>
+        `;
+      }
+
+      function renderRooms() {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+          <section class="section">
+            <h2>Rooms</h2>
+            <p class="lead">Find your perfect stay. Filter by type and capacity.</p>
+            <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+              ${state.rooms.map(r => `
+                <article class="card">
+                  <img src="${r.image}" alt="${r.name}" />
+                  <div class="card-body">
+                    <div class="row" style="align-items:center; justify-content: space-between;">
+                      <h3 style="margin:0;">${r.name}</h3>
+                      <span class="badge ${r.status==='available' ? 'ok' : 'busy'}">${r.status}</span>
+                    </div>
+                    <div class="muted">Room No: <strong>${r.id}</strong> • Type: ${r.type} • Sleeps ${r.capacity} • ${r.rating}★</div>
+                    <div class="row" style="align-items:center; justify-content: space-between; margin-top:8px;">
+                      <div class="price">${money(r.price)}<span class="muted">/night</span></div>
+                      <div class="row" style="gap:8px; flex: 0 0 auto;">
+                        <button class="btn" onclick="alert('Room ${r.id} - ${r.name}\\n${r.location}\\nRating: ${r.rating}★\\n${money(r.price)}/night')">Details</button>
+                        <button class="btn primary" ${r.status!=='available'?'disabled':''} onclick="state.booking.roomId='${r.id}'; setHash('/booking', { room: '${r.id}' });">Book</button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              `).join('')}
+            </div>
+          </section>
+        `;
+      }
+
+      function renderServices() {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+          <section class="section">
+            <h2>Services</h2>
+            <p class="lead">Food and Membership services.</p>
+            <div class="row">
+              ${state.services.map(s => `
+                <div class="card">
+                  <img src="${s.image}" alt="${s.name}" />
+                  <div class="card-body">
+                    <strong>${s.name}</strong>
+                    <div class="muted">${s.desc}</div>
+                    <div class="row" style="align-items:center; justify-content: space-between; margin-top:8px;">
+                      <span class="price">${money(s.price)}</span>
+                      <button class="btn primary" onclick="alert('Added to booking: ${s.name}'); setHash('/booking');">Request</button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+        `;
+      }
+
+      function renderStaff() {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+          <section class="section">
+            <h2>Staff</h2>
+            <p class="lead">Our team is here for you. Request preferred assistance.</p>
+            <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(220px,1fr));">
+              ${state.staff.map(t => `
+                <div class="card">
+                  <img src="${t.image}" alt="${t.name}" onerror="this.onerror=null; this.src='https://i.pravatar.cc/160?u=${encodeURIComponent(t.name)}';" />
+                  <div class="card-body">
+                    <strong>${t.name}</strong>
+                    <div class="muted">${t.role} • ${t.skill}</div>
+                    <div class="row" style="margin-top:8px;">
+                      <button class="btn" onclick="alert('Assigned ${t.name} to your booking'); setHash('/booking');">Assign to Booking</button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+        `;
+      }
+
+      function renderBooking() {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+          <section class="section split">
+            <div>
+              <h2>Booking</h2>
+              <p class="lead">Enter your details and customize your stay.</p>
+              <form id="bookForm">
+                <div class="row">
+                  <div class="field">
+                    <label for="name">Full Name</label>
+                    <input id="name" name="name" placeholder="Jane Doe" />
+                  </div>
+                  <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" placeholder="jane@example.com" />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="field"><label for="checkIn">Check-in</label><input id="checkIn" type="date" /></div>
+                  <div class="field"><label for="checkOut">Check-out</label><input id="checkOut" type="date" /></div>
+                  <div class="field"><label for="guests">Guests</label><select id="guests"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+                </div>
+                <div class="row">
+                  <div class="field" style="flex:2 1 360px;">
+                    <label for="roomSel">Room</label>
+                    <select id="roomSel">
+                      ${state.rooms.map(r => `<option value="${r.id}" ${state.booking.roomId===r.id?'selected':''} ${r.status!=='available'?'disabled':''}>${r.id} — ${r.name} — ${money(r.price)}/night ${r.status!=='available'?'(booked)':''}</option>`).join('')}
+                    </select>
+                  </div>
+                </div>
+                <div class="row" style="justify-content: space-between;">
+                  <div class="row" style="gap:8px;">
+                    <a class="btn ghost" href="#/rooms">Back to Rooms</a>
+                    <a class="btn ghost" href="#/services">View Services</a>
+                  </div>
+                  <button class="btn primary" type="submit">Proceed to Payment</button>
+                </div>
+              </form>
+            </div>
+            <aside class="sidebar card">
+              <div class="card-body">
+                <h3>Summary</h3>
+                <div class="muted">Demo booking system - data stored locally</div>
+                <div style="margin-top:8px;">
+                  <div class="muted">Total: ${money(0)}</div>
+                </div>
+              </div>
+            </aside>
+          </section>
+        `;
+        
+        document.getElementById('bookForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          alert('Demo booking created! In the full version, this would be saved to MySQL database.');
+          setHash('/home');
+        });
+      }
+
+      function renderPayment() {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+          <section class="section split">
+            <div>
+              <h2>Payment</h2>
+              <p class="lead">Complete your booking securely.</p>
+              <form id="payForm">
+                <div class="field"><label for="cardName">Name on Card</label><input id="cardName" required placeholder="Jane Doe"/></div>
+                <div class="row">
+                  <div class="field"><label for="cardNum">Card Number</label><input id="cardNum" required inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456"/></div>
+                  <div class="field"><label for="exp">Expiry</label><input id="exp" required placeholder="MM/YY"/></div>
+                  <div class="field"><label for="cvv">CVV</label><input id="cvv" required inputmode="numeric" maxlength="4" placeholder="123"/></div>
+                </div>
+                <div class="row" style="justify-content: space-between;">
+                  <a class="btn ghost" href="#/booking">Back to Booking</a>
+                  <button class="btn success" type="submit">Confirm & Pay</button>
+                </div>
+              </form>
+            </div>
+            <aside class="sidebar card">
+              <div class="card-body">
+                <h3>Booking Summary</h3>
+                <div class="muted">Demo payment system</div>
+                <div class="row" style="align-items:center; justify-content: space-between;"><strong>Total</strong><strong>${money(0)}</strong></div>
+              </div>
+            </aside>
+          </section>
+        `;
+        
+        document.getElementById('payForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          alert('Demo payment successful! In the full version, this would be processed and stored in MySQL database.');
+          setHash('/home');
+        });
+      }
+
+      function renderMembership() {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+          <section class="section">
+            <h2>Membership</h2>
+            <p class="lead">Join to unlock benefits and exclusive offers.</p>
+            <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(240px,1fr));">
+              <div class="card">
+                <div class="card-body">
+                  <h3>Silver</h3>
+                  <div class="price" style="margin-bottom:6px;">${money(49)}/year</div>
+                  <ul class="muted" style="margin:0 0 8px 16px;">
+                    <li>5% off rooms</li>
+                    <li>Late checkout</li>
+                    <li>Welcome drink</li>
+                  </ul>
+                  <button class="btn primary" onclick="alert('Demo membership request: Silver. In the full version, this would be saved to MySQL database.');">Join Now</button>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-body">
+                  <h3>Gold</h3>
+                  <div class="price" style="margin-bottom:6px;">${money(129)}/year</div>
+                  <ul class="muted" style="margin:0 0 8px 16px;">
+                    <li>10% off rooms</li>
+                    <li>Free breakfast</li>
+                    <li>Spa access</li>
+                  </ul>
+                  <button class="btn primary" onclick="alert('Demo membership request: Gold. In the full version, this would be saved to MySQL database.');">Join Now</button>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-body">
+                  <h3>Platinum</h3>
+                  <div class="price" style="margin-bottom:6px;">${money(249)}/year</div>
+                  <ul class="muted" style="margin:0 0 8px 16px;">
+                    <li>15% off rooms</li>
+                    <li>Suite upgrades</li>
+                    <li>Concierge priority</li>
+                  </ul>
+                  <button class="btn primary" onclick="alert('Demo membership request: Platinum. In the full version, this would be saved to MySQL database.');">Join Now</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+
+      function renderContact() {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+          <section class="section split">
+            <div>
+              <h2>Contact Us</h2>
+              <p class="lead">We typically respond within a business day.</p>
+              <form id="contactForm">
+                <div class="row">
+                  <div class="field"><label>Name</label><input id="cname" required placeholder="Your name"/></div>
+                  <div class="field"><label>Email</label><input id="cemail" required type="email" placeholder="you@example.com"/></div>
+                </div>
+                <div class="field"><label>Message</label><textarea id="cmsg" required placeholder="How can we help?"></textarea></div>
+                <div class="row" style="justify-content: space-between;">
+                  <a class="btn ghost" href="#/home">Home</a>
+                  <button class="btn primary" type="submit">Send</button>
+                </div>
+              </form>
+            </div>
+            <aside class="sidebar card">
+              <div class="card-body">
+                <h3>Reach us</h3>
+                <div class="muted">Phone: +91 98765 43210, +91 91234 56789</div>
+                <div class="muted">Email: hotelmahi@hotelmahi.in</div>
+                <div class="muted">Address: Tejaji Nagar, Near Phoenix Mall, Indore</div>
+              </div>
+            </aside>
+          </section>
+        `;
+        
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          alert('Demo contact form submitted! In the full version, this would be saved to MySQL database.');
+          setHash('/home');
+        });
+      }
+
+      // --- Mount routes
+      Router.mount('/home', renderHome);
+      Router.mount('/rooms', renderRooms);
+      Router.mount('/services', renderServices);
+      Router.mount('/staff', renderStaff);
+      Router.mount('/booking', renderBooking);
+      Router.mount('/payment', renderPayment);
+      Router.mount('/membership', renderMembership);
+      Router.mount('/contact', renderContact);
+
+      // --- Initialize app
+      const initApp = () => {
+        // Check for existing user session
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+          currentUser = JSON.parse(savedUser);
+          updateUserInterface();
+        }
+        
+        // Set up event listeners
+        document.getElementById('authForm').addEventListener('submit', handleAuth);
+        document.getElementById('toggleAuth').addEventListener('click', toggleAuthMode);
+        
+        // Initialize router
+        Router.start();
+      };
+
+      // --- Init
+      document.getElementById('year').textContent = new Date().getFullYear();
+      initApp();
+    </script>
+  </body>
+</html>
